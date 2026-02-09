@@ -105,9 +105,11 @@ class MultiModalPromptLearner(nn.Module):
         if hasattr(clip_model.visual, 'attnpool'):
             # ResNet model: use output_dim which is the embedding dimension
             vis_dim = clip_model.visual.output_dim
-        else:
+        elif hasattr(clip_model.visual, 'conv1'):
             # ViT model: conv1 is the patch embedding, width is the transformer dimension
             vis_dim = clip_model.visual.conv1.weight.shape[0]  # e.g., 768 for ViT-B/16
+        else:
+            raise ValueError(f"Unsupported CLIP visual architecture. Expected ResNet (with attnpool) or ViT (with conv1).")
         self.proj = nn.Linear(ctx_dim, vis_dim)
         self.proj.half()
         self.ctx = nn.Parameter(ctx_vectors)
