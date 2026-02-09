@@ -51,7 +51,7 @@ class MaPLeBATCLIP(TTAMethod):
     def configure_model(self):
         """
         Enable gradients only for:
-        - MaPLe prompt learner deep compound prompts (deep_ctx).
+        - MaPLe prompt learner deep compound prompts (compound_prompts_text and compound_prompt_projections).
         - All nn.LayerNorm layers in image_encoder and text_encoder.
         """
         self.model.eval()
@@ -63,40 +63,37 @@ class MaPLeBATCLIP(TTAMethod):
         prompt_learner = getattr(self.model, "prompt_learner", None)
         if prompt_learner is not None:
             for name, p in prompt_learner.named_parameters():
-                # Only deep compound prompts
-                if "deep_ctx" in name:
+                # Deep compound prompts (text and visual projections)
+                if "compound_prompts_text" in name or "compound_prompt_projections" in name:
                     p.requires_grad_(True)
                     adapted_names.append(f"prompt_learner.{name}")
 
-        # 2) Enable all LayerNorms in image and text encoders
-        for name, m in self.model.named_modules():
-            if not isinstance(m, nn.LayerNorm):
-                continue
-
-            in_image = "image_encoder" in name
-            in_text = "text_encoder" in name
-
-            if in_image or in_text:
+        # 2) Enable all LayerNorms,batchnorm1d,batchnorm2d,groupnorm in image and text encoders
+        for nm, m in self.model.named_modules():
+            if isinstance(m, (nn.LayerNorm, nn.BatchNorm1d, nn.GroupNorm)):
+                m.train()
                 m.requires_grad_(True)
-                adapted_names.append(name)
-
-        if adapted_names:
-            logger.info("[MaPLeBATCLIP] Adapted parameters/layers (%d):", len(adapted_names))
-            for nm in sorted(adapted_names):
-                logger.info("  - %s", nm)
+            elif isinstance(m, nn.BatchNorm2d):
+                m.train()
+                m.requires_grad_(True)
+                m.track_running_stats = False
+                m.running_mean = None
+                m.running_var = None
 
     def collect_params(self):
         """
         Collect trainable parameters:
         - LayerNorm weights/biases in encoders.
-        - MaPLe deep prompt parameters (deep_ctx).
+        - MaPLe deep prompt parameters (compound_prompts_text and compound_prompt_projections).
         """
         params = []
         names = []
+        
+        # LayerNorms,batchnorm1d,batchnorm2d,groupnorm in encoders
         for nm, m in self.model.named_modules():
-            if isinstance(m, nn.LayerNorm):
+            if isinstance(m, (nn.BatchNorm1d, nn.BatchNorm2d, nn.LayerNorm, nn.GroupNorm)):
                 for np, p in m.named_parameters():
-                    if np in ("weight", "bias") and p.requires_grad:
+                    if np in ['weight', 'bias']:
                         params.append(p)
                         names.append(f"{nm}.{np}")
 
@@ -104,7 +101,7 @@ class MaPLeBATCLIP(TTAMethod):
         prompt_learner = getattr(self.model, "prompt_learner", None)
         if prompt_learner is not None:
             for np, p in prompt_learner.named_parameters():
-                if "deep_ctx" in np and p.requires_grad:
+                if ("compound_prompts_text" in np or "compound_prompt_projections" in np) and p.requires_grad:
                     params.append(p)
                     names.append(f"prompt_learner.{np}")
 
@@ -115,6 +112,7 @@ class MaPLeBATCLIP(TTAMethod):
         """
         Single forward with BATCLIP losses:
         - Uses logits + image/text pre-features from MaPLe CLIP wrapper.
+        Follows BMPETCLIP pattern.
         """
         imgs_test = x[0]
 
@@ -126,7 +124,7 @@ class MaPLeBATCLIP(TTAMethod):
 
         logits, image_features, text_features_flat, img_pre_features, text_pre_features = outputs
 
-        # Compute BATCLIP losses
+        # Compute BATCLIP losses (same pattern as BMPETCLIP)
         if self.scaler:
             with torch.cuda.amp.autocast():
                 loss = self._compute_loss(logits, img_pre_features, text_features_flat)

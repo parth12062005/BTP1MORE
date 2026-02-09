@@ -15,7 +15,8 @@ from robustbench.utils import load_model
 from typing import Union
 from copy import deepcopy
 from models import resnet26
-from models.custom_clip import ClipTestTimePromptTuning, ClipBMPET, ClipMaPLe
+from models.custom_clip import ClipTestTimePromptTuning, ClipBMPET
+from models.maple_clip import ClipMaPLe
 from packaging import version
 from datasets.cls_names import get_class_names
 from datasets.imagenet_subsets import IMAGENET_A_MASK, IMAGENET_R_MASK, IMAGENET_V2_MASK, IMAGENET_D109_MASK
