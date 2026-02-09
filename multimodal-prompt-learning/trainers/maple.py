@@ -102,12 +102,12 @@ class MultiModalPromptLearner(nn.Module):
         # These below, related to the shallow prompts
         # Linear layer so that the tokens will project to visual width (e.g., 768) from text ctx_dim
         # Get the visual feature dimension based on model architecture
-        if hasattr(clip_model.visual, 'conv1') and not hasattr(clip_model.visual, 'attnpool'):
-            # ViT model: conv1 is the patch embedding, width is the transformer dimension
-            vis_dim = clip_model.visual.conv1.weight.shape[0]  # e.g., 768 for ViT-B/16
-        else:
+        if hasattr(clip_model.visual, 'attnpool'):
             # ResNet model: use output_dim which is the embedding dimension
             vis_dim = clip_model.visual.output_dim
+        else:
+            # ViT model: conv1 is the patch embedding, width is the transformer dimension
+            vis_dim = clip_model.visual.conv1.weight.shape[0]  # e.g., 768 for ViT-B/16
         self.proj = nn.Linear(ctx_dim, vis_dim)
         self.proj.half()
         self.ctx = nn.Parameter(ctx_vectors)
@@ -115,7 +115,7 @@ class MultiModalPromptLearner(nn.Module):
         # Define the compound prompts for the deeper layers
 
         # Minimum can be 1, which defaults to shallow MaPLe
-        # compound prompts
+        # compound prompts - text prompts stay in ctx_dim (e.g., 512) space
         self.compound_prompts_text = nn.ParameterList([nn.Parameter(torch.empty(n_ctx, ctx_dim, dtype=dtype))
                                                       for _ in range(self.compound_prompts_depth - 1)])
         for single_para in self.compound_prompts_text:
@@ -175,13 +175,13 @@ class MultiModalPromptLearner(nn.Module):
         prompts = self.construct_prompts(ctx, prefix, suffix)
 
         # Before returning, need to transform
-        # prompts to 768 for the visual side
+        # prompts to vis_dim for the visual side
         visual_deep_prompts = []
         for index, layer in enumerate(self.compound_prompt_projections):
             visual_deep_prompts.append(layer(self.compound_prompts_text[index]))
         # Now the other way around
-        # We will project the textual prompts from 512 to 768
-        return prompts, self.proj(self.ctx), self.compound_prompts_text, visual_deep_prompts   # pass here original, as for visual 768 is required
+        # We will project the textual prompts from ctx_dim to vis_dim
+        return prompts, self.proj(self.ctx), self.compound_prompts_text, visual_deep_prompts   # pass here original, as for visual vis_dim is required
 
 
 class CustomCLIP(nn.Module):
