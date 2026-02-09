@@ -101,10 +101,13 @@ class MultiModalPromptLearner(nn.Module):
         print(f"Number of MaPLe context words (tokens): {n_ctx}")
         # These below, related to the shallow prompts
         # Linear layer so that the tokens will project to visual width (e.g., 768) from text ctx_dim
-        vis_dim = clip_model.visual.output_dim  # Get the visual feature dimension
-        # For ViT models, we need to project to the internal transformer width, not output_dim
-        if hasattr(clip_model.visual, 'conv1'):  # ViT model
+        # Get the visual feature dimension based on model architecture
+        if hasattr(clip_model.visual, 'conv1') and not hasattr(clip_model.visual, 'attnpool'):
+            # ViT model: conv1 is the patch embedding, width is the transformer dimension
             vis_dim = clip_model.visual.conv1.weight.shape[0]  # e.g., 768 for ViT-B/16
+        else:
+            # ResNet model: use output_dim which is the embedding dimension
+            vis_dim = clip_model.visual.output_dim
         self.proj = nn.Linear(ctx_dim, vis_dim)
         self.proj.half()
         self.ctx = nn.Parameter(ctx_vectors)
