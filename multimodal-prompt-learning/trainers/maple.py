@@ -51,7 +51,7 @@ class TextEncoder(nn.Module):
         self.dtype = clip_model.dtype
 
     def forward(self, prompts, tokenized_prompts, compound_prompts_deeper_text):
-        x = prompts + self.positional_embedding.type(self.dtype)
+        x = prompts + self.positional_embedding[:prompts.shape[1], :].type(self.dtype)
         x = x.permute(1, 0, 2)  # NLD -> LND
         # Pass as the list, as nn.sequential cannot process multiple arguments in the forward pass
         combined = [x, compound_prompts_deeper_text, 0]  # third argument is the counter which denotes depth of prompt
@@ -100,8 +100,12 @@ class MultiModalPromptLearner(nn.Module):
         print(f'Initial context: "{prompt_prefix}"')
         print(f"Number of MaPLe context words (tokens): {n_ctx}")
         # These below, related to the shallow prompts
-        # Linear layer so that the tokens will project to 512 and will be initialized from 768
-        self.proj = nn.Linear(ctx_dim, 768)
+        # Linear layer so that the tokens will project to visual width (e.g., 768) from text ctx_dim
+        vis_dim = clip_model.visual.output_dim  # Get the visual feature dimension
+        # For ViT models, we need to project to the internal transformer width, not output_dim
+        if hasattr(clip_model.visual, 'conv1'):  # ViT model
+            vis_dim = clip_model.visual.conv1.weight.shape[0]  # e.g., 768 for ViT-B/16
+        self.proj = nn.Linear(ctx_dim, vis_dim)
         self.proj.half()
         self.ctx = nn.Parameter(ctx_vectors)
         # These below parameters related to the shared prompts
@@ -109,12 +113,12 @@ class MultiModalPromptLearner(nn.Module):
 
         # Minimum can be 1, which defaults to shallow MaPLe
         # compound prompts
-        self.compound_prompts_text = nn.ParameterList([nn.Parameter(torch.empty(n_ctx, 512))
+        self.compound_prompts_text = nn.ParameterList([nn.Parameter(torch.empty(n_ctx, ctx_dim, dtype=dtype))
                                                       for _ in range(self.compound_prompts_depth - 1)])
         for single_para in self.compound_prompts_text:
             nn.init.normal_(single_para, std=0.02)
         # Also make corresponding projection layers, for each prompt
-        single_layer = nn.Linear(ctx_dim, 768)
+        single_layer = nn.Linear(ctx_dim, vis_dim)
         self.compound_prompt_projections = _get_clones(single_layer, self.compound_prompts_depth - 1)
 
         classnames = [name.replace("_", " ") for name in classnames]
