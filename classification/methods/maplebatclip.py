@@ -57,8 +57,6 @@ class MaPLeBATCLIP(TTAMethod):
         self.model.eval()
         self.model.requires_grad_(False)
 
-        adapted_names = []
-
         # 1) Enable MaPLe deep prompts
         prompt_learner = getattr(self.model, "prompt_learner", None)
         if prompt_learner is not None:
@@ -66,7 +64,6 @@ class MaPLeBATCLIP(TTAMethod):
                 # Deep compound prompts (text and visual projections)
                 if "compound_prompts_text" in name or "compound_prompt_projections" in name:
                     p.requires_grad_(True)
-                    adapted_names.append(f"prompt_learner.{name}")
 
         # 2) Enable all LayerNorms,batchnorm1d,batchnorm2d,groupnorm in image and text encoders
         for nm, m in self.model.named_modules():

@@ -320,9 +320,8 @@ class ClipMaPLe(nn.Module):
         text_features = text_pre_features / (text_pre_features.norm(dim=-1, keepdim=True) + 1e-8)
         
         # Encode image with deep prompts
-        image_features = self.image_encoder(image, shared_ctx, deep_compound_prompts_vision)
-        img_pre_features = image_features
-        image_features = image_features / (image_features.norm(dim=-1, keepdim=True) + 1e-8)
+        img_pre_features = self.image_encoder(image, shared_ctx, deep_compound_prompts_vision)
+        image_features = img_pre_features / (img_pre_features.norm(dim=-1, keepdim=True) + 1e-8)
         
         # Compute logits
         logit_scale = self.logit_scale.exp().clamp(max=100.0)
