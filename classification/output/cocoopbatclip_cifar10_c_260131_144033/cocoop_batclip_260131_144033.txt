@@ -1,0 +1,242 @@
+[26/01/31 14:40:33] [conf.py:  424]: PyTorch Version: torch=2.2.1, cuda=12.1, cudnn=8902
+[26/01/31 14:40:33] [conf.py:  425]: ADACONTRAST:
+  ALPHA: 1.0
+  BETA: 1.0
+  CE_SUP_TYPE: weak_strong
+  CE_TYPE: standard
+  CONTRAST_TYPE: class_aware
+  DIST_TYPE: cosine
+  ETA: 1.0
+  NUM_NEIGHBORS: 10
+  QUEUE_SIZE: 16384
+  REFINE_METHOD: nearest_neighbors
+BN:
+  ALPHA: 0.1
+CKPT_DIR: ./ckpt
+CLIP:
+  FREEZE_TEXT_ENCODER: False
+  PRECISION: fp16
+  PROMPT_MODE: custom
+  PROMPT_PATH: datasets/cupl_prompts/CuPL_ImageNet_prompts.json
+  PROMPT_TEMPLATE: ['a photo of a {}.']
+CMF:
+  ALPHA: 0.99
+  GAMMA: 0.99
+  Q: 0.005
+  TYPE: lp
+CONTRAST:
+  MODE: all
+  PROJECTION_DIM: 128
+  TEMPERATURE: 0.1
+CORRUPTION:
+  DATASET: cifar10_c
+  NUM_EX: -1
+  SEVERITY: [1, 2, 3, 4, 5]
+  TYPE: ['gaussian_noise', 'shot_noise', 'impulse_noise', 'defocus_blur', 'glass_blur', 'motion_blur', 'zoom_blur', 'snow', 'frost', 'fog', 'brightness', 'contrast', 'elastic_transform', 'pixelate', 'jpeg_compression']
+COTTA:
+  AP: 0.92
+  RST: 0.01
+CUDNN:
+  BENCHMARK: True
+DATA_DIR: ./data
+DESC: 
+DETERMINISM: False
+DEYO:
+  AUG_TYPE: patch
+  COLUMN_START: 56
+  MARGIN: 0.5
+  OCCLUSION_SIZE: 112
+  PATCH_LEN: 4
+  PLPD: 0.2
+  REWEIGHT_ENT: True
+  REWEIGHT_PLPD: True
+  ROW_START: 56
+EATA:
+  D_MARGIN: 0.05
+  FISHER_ALPHA: 2000.0
+  MARGIN_E0: 0.4
+GTTA:
+  LAMBDA_MIXUP: 0.3333333333333333
+  PRETRAIN_STEPS_ADAIN: 20000
+  STEPS_ADAIN: 1
+  USE_STYLE_TRANSFER: False
+LAME:
+  AFFINITY: rbf
+  FORCE_SYMMETRY: False
+  KNN: 5
+  SIGMA: 1.0
+LOG_DEST: cocoop_batclip_260131_144033.txt
+LOG_TIME: 260131_144033
+MIXED_PRECISION: False
+MODEL:
+  ADAPTATION: cocoopbatclip
+  ARCH: ViT-B-16
+  CKPT_PATH: checkpoints/cocoop_cifar10_best.pth
+  EPISODIC: False
+  RESET_AFTER_NUM_UPDATES: 0
+  USE_CLIP: True
+  WEIGHTS: openai
+M_TEACHER:
+  MOMENTUM: 0.999
+OPTIM:
+  BETA: 0.9
+  DAMPENING: 0.0
+  LR: 0.001
+  METHOD: AdamW
+  MOMENTUM: 0.9
+  NESTEROV: True
+  STEPS: 1
+  WD: 0.01
+PRINT_EVERY: -1
+RMT:
+  LAMBDA_CE_SRC: 1.0
+  LAMBDA_CE_TRG: 1.0
+  LAMBDA_CONT: 1.0
+  NUM_SAMPLES_WARM_UP: 50000
+RNG_SEED: 1
+ROID:
+  MOMENTUM_PROBS: 0.9
+  MOMENTUM_SRC: 0.99
+  TEMPERATURE: 0.3333333333333333
+  USE_CONSISTENCY: True
+  USE_PRIOR_CORRECTION: True
+  USE_WEIGHTING: True
+ROTTA:
+  ALPHA: 0.05
+  LAMBDA_T: 1.0
+  LAMBDA_U: 1.0
+  MEMORY_SIZE: 64
+  NU: 0.001
+  UPDATE_FREQUENCY: 64
+RPL:
+  Q: 0.8
+SANTA:
+  LAMBDA_CE_TRG: 1.0
+  LAMBDA_CONT: 1.0
+SAR:
+  RESET_CONSTANT_EM: 0.2
+SAVE_DIR: ./output/cocoopbatclip_cifar10_c_260131_144033
+SETTING: reset_each_shift
+SOURCE:
+  NUM_SAMPLES: -1
+  NUM_WORKERS: 4
+  PERCENTAGE: 1.0
+TEST:
+  BATCH_SIZE: 128
+  DEBUG: False
+  DELTA_DIRICHLET: 0.0
+  NUM_WORKERS: 4
+  N_AUGMENTATIONS: 32
+  WINDOW_LENGTH: 1
+TPT:
+  CLASS_TOKEN_POS: end
+  CTX_INIT: a_photo_of_a
+  LAMBDA_ENT: 0.0
+  N_CTX: 4
+  SELECTION_P: 0.1
+[26/01/31 14:40:33] [factory.py:  202]: Loading pretrained ViT-B-16 from OpenAI.
+[26/01/31 14:40:38] [custom_clip.py:   72]: Initializing the context with given words: [a_photo_of_a]
+[26/01/31 14:40:38] [custom_clip.py:   98]: Initial context: "a photo of a"
+[26/01/31 14:40:38] [custom_clip.py:   99]: Number of context words (tokens): 4
+[26/01/31 14:40:38] [model.py:  461]: Successfully restored pre-trained soft prompt (CoOp) for CoCoOp-BATCLIP
+[26/01/31 14:40:38] [base.py:  186]: #Trainable/total parameters: 65,536/149,656,096 	 Ratio: 0.044% 
+[26/01/31 14:40:38] [test_time.py:   45]: Successfully prepared test-time adaptation method: cocoopbatclip
+[26/01/31 14:40:38] [test_time.py:   56]: Using cifar10_c with the following domain sequence: ['gaussian_noise', 'shot_noise', 'impulse_noise', 'defocus_blur', 'glass_blur', 'motion_blur', 'zoom_blur', 'snow', 'frost', 'fog', 'brightness', 'contrast', 'elastic_transform', 'pixelate', 'jpeg_compression']
+[26/01/31 14:40:38] [test_time.py:   80]: resetting model
+[26/01/31 14:40:38] [test_time.py:  110]: Using the following data transformation:
+Compose(
+    Resize(size=224, interpolation=bicubic, max_size=None, antialias=True)
+    CenterCrop(size=(224, 224))
+    <function _convert_to_rgb at 0x7fc27640aac0>
+    ToTensor()
+)
+[26/01/31 14:42:09] [test_time.py:  130]: cifar10_c error % [gaussian_noise1][#samples=10000]: 13.84%
+[26/01/31 14:43:39] [test_time.py:  130]: cifar10_c error % [gaussian_noise2][#samples=10000]: 21.39%
+[26/01/31 14:45:09] [test_time.py:  130]: cifar10_c error % [gaussian_noise3][#samples=10000]: 28.59%
+[26/01/31 14:46:40] [test_time.py:  130]: cifar10_c error % [gaussian_noise4][#samples=10000]: 31.81%
+[26/01/31 14:48:10] [test_time.py:  130]: cifar10_c error % [gaussian_noise5][#samples=10000]: 34.97%
+[26/01/31 14:48:10] [test_time.py:   80]: resetting model
+[26/01/31 14:49:40] [test_time.py:  130]: cifar10_c error % [shot_noise1][#samples=10000]: 10.66%
+[26/01/31 14:51:10] [test_time.py:  130]: cifar10_c error % [shot_noise2][#samples=10000]: 15.34%
+[26/01/31 14:52:40] [test_time.py:  130]: cifar10_c error % [shot_noise3][#samples=10000]: 23.12%
+[26/01/31 14:54:10] [test_time.py:  130]: cifar10_c error % [shot_noise4][#samples=10000]: 26.51%
+[26/01/31 14:55:40] [test_time.py:  130]: cifar10_c error % [shot_noise5][#samples=10000]: 31.12%
+[26/01/31 14:55:40] [test_time.py:   80]: resetting model
+[26/01/31 14:57:10] [test_time.py:  130]: cifar10_c error % [impulse_noise1][#samples=10000]: 9.83%
+[26/01/31 14:58:40] [test_time.py:  130]: cifar10_c error % [impulse_noise2][#samples=10000]: 15.31%
+[26/01/31 15:00:10] [test_time.py:  130]: cifar10_c error % [impulse_noise3][#samples=10000]: 19.29%
+[26/01/31 15:01:40] [test_time.py:  130]: cifar10_c error % [impulse_noise4][#samples=10000]: 24.46%
+[26/01/31 15:03:10] [test_time.py:  130]: cifar10_c error % [impulse_noise5][#samples=10000]: 30.32%
+[26/01/31 15:03:10] [test_time.py:   80]: resetting model
+[26/01/31 15:04:40] [test_time.py:  130]: cifar10_c error % [defocus_blur1][#samples=10000]: 6.40%
+[26/01/31 15:06:09] [test_time.py:  130]: cifar10_c error % [defocus_blur2][#samples=10000]: 10.07%
+[26/01/31 15:07:40] [test_time.py:  130]: cifar10_c error % [defocus_blur3][#samples=10000]: 12.08%
+[26/01/31 15:09:10] [test_time.py:  130]: cifar10_c error % [defocus_blur4][#samples=10000]: 15.15%
+[26/01/31 15:10:41] [test_time.py:  130]: cifar10_c error % [defocus_blur5][#samples=10000]: 20.70%
+[26/01/31 15:10:41] [test_time.py:   80]: resetting model
+[26/01/31 15:12:12] [test_time.py:  130]: cifar10_c error % [glass_blur1][#samples=10000]: 27.46%
+[26/01/31 15:13:42] [test_time.py:  130]: cifar10_c error % [glass_blur2][#samples=10000]: 33.80%
+[26/01/31 15:15:13] [test_time.py:  130]: cifar10_c error % [glass_blur3][#samples=10000]: 40.94%
+[26/01/31 15:16:43] [test_time.py:  130]: cifar10_c error % [glass_blur4][#samples=10000]: 55.78%
+[26/01/31 15:18:14] [test_time.py:  130]: cifar10_c error % [glass_blur5][#samples=10000]: 61.01%
+[26/01/31 15:18:14] [test_time.py:   80]: resetting model
+[26/01/31 15:19:44] [test_time.py:  130]: cifar10_c error % [motion_blur1][#samples=10000]: 8.09%
+[26/01/31 15:21:14] [test_time.py:  130]: cifar10_c error % [motion_blur2][#samples=10000]: 14.85%
+[26/01/31 15:22:45] [test_time.py:  130]: cifar10_c error % [motion_blur3][#samples=10000]: 18.30%
+[26/01/31 15:24:15] [test_time.py:  130]: cifar10_c error % [motion_blur4][#samples=10000]: 18.80%
+[26/01/31 15:25:46] [test_time.py:  130]: cifar10_c error % [motion_blur5][#samples=10000]: 22.93%
+[26/01/31 15:25:46] [test_time.py:   80]: resetting model
+[26/01/31 15:27:16] [test_time.py:  130]: cifar10_c error % [zoom_blur1][#samples=10000]: 8.98%
+[26/01/31 15:28:47] [test_time.py:  130]: cifar10_c error % [zoom_blur2][#samples=10000]: 13.22%
+[26/01/31 15:30:17] [test_time.py:  130]: cifar10_c error % [zoom_blur3][#samples=10000]: 14.88%
+[26/01/31 15:31:48] [test_time.py:  130]: cifar10_c error % [zoom_blur4][#samples=10000]: 16.52%
+[26/01/31 15:33:18] [test_time.py:  130]: cifar10_c error % [zoom_blur5][#samples=10000]: 18.57%
+[26/01/31 15:33:18] [test_time.py:   80]: resetting model
+[26/01/31 15:34:48] [test_time.py:  130]: cifar10_c error % [snow1][#samples=10000]: 8.02%
+[26/01/31 15:36:19] [test_time.py:  130]: cifar10_c error % [snow2][#samples=10000]: 16.12%
+[26/01/31 15:37:49] [test_time.py:  130]: cifar10_c error % [snow3][#samples=10000]: 17.57%
+[26/01/31 15:39:19] [test_time.py:  130]: cifar10_c error % [snow4][#samples=10000]: 20.97%
+[26/01/31 15:40:50] [test_time.py:  130]: cifar10_c error % [snow5][#samples=10000]: 22.83%
+[26/01/31 15:40:50] [test_time.py:   80]: resetting model
+[26/01/31 15:42:20] [test_time.py:  130]: cifar10_c error % [frost1][#samples=10000]: 7.37%
+[26/01/31 15:43:50] [test_time.py:  130]: cifar10_c error % [frost2][#samples=10000]: 12.18%
+[26/01/31 15:45:21] [test_time.py:  130]: cifar10_c error % [frost3][#samples=10000]: 16.36%
+[26/01/31 15:46:51] [test_time.py:  130]: cifar10_c error % [frost4][#samples=10000]: 18.04%
+[26/01/31 15:48:22] [test_time.py:  130]: cifar10_c error % [frost5][#samples=10000]: 20.75%
+[26/01/31 15:48:22] [test_time.py:   80]: resetting model
+[26/01/31 15:49:53] [test_time.py:  130]: cifar10_c error % [fog1][#samples=10000]: 6.28%
+[26/01/31 15:51:23] [test_time.py:  130]: cifar10_c error % [fog2][#samples=10000]: 10.46%
+[26/01/31 15:52:53] [test_time.py:  130]: cifar10_c error % [fog3][#samples=10000]: 12.73%
+[26/01/31 15:54:24] [test_time.py:  130]: cifar10_c error % [fog4][#samples=10000]: 15.09%
+[26/01/31 15:55:54] [test_time.py:  130]: cifar10_c error % [fog5][#samples=10000]: 21.34%
+[26/01/31 15:55:54] [test_time.py:   80]: resetting model
+[26/01/31 15:57:25] [test_time.py:  130]: cifar10_c error % [brightness1][#samples=10000]: 6.00%
+[26/01/31 15:58:55] [test_time.py:  130]: cifar10_c error % [brightness2][#samples=10000]: 8.98%
+[26/01/31 16:00:26] [test_time.py:  130]: cifar10_c error % [brightness3][#samples=10000]: 10.75%
+[26/01/31 16:01:56] [test_time.py:  130]: cifar10_c error % [brightness4][#samples=10000]: 11.81%
+[26/01/31 16:03:27] [test_time.py:  130]: cifar10_c error % [brightness5][#samples=10000]: 14.17%
+[26/01/31 16:03:27] [test_time.py:   80]: resetting model
+[26/01/31 16:04:57] [test_time.py:  130]: cifar10_c error % [contrast1][#samples=10000]: 6.10%
+[26/01/31 16:06:28] [test_time.py:  130]: cifar10_c error % [contrast2][#samples=10000]: 10.12%
+[26/01/31 16:07:58] [test_time.py:  130]: cifar10_c error % [contrast3][#samples=10000]: 11.21%
+[26/01/31 16:09:28] [test_time.py:  130]: cifar10_c error % [contrast4][#samples=10000]: 12.34%
+[26/01/31 16:10:58] [test_time.py:  130]: cifar10_c error % [contrast5][#samples=10000]: 17.55%
+[26/01/31 16:10:58] [test_time.py:   80]: resetting model
+[26/01/31 16:12:29] [test_time.py:  130]: cifar10_c error % [elastic_transform1][#samples=10000]: 10.04%
+[26/01/31 16:14:00] [test_time.py:  130]: cifar10_c error % [elastic_transform2][#samples=10000]: 14.41%
+[26/01/31 16:15:30] [test_time.py:  130]: cifar10_c error % [elastic_transform3][#samples=10000]: 16.87%
+[26/01/31 16:17:00] [test_time.py:  130]: cifar10_c error % [elastic_transform4][#samples=10000]: 22.73%
+[26/01/31 16:18:31] [test_time.py:  130]: cifar10_c error % [elastic_transform5][#samples=10000]: 31.47%
+[26/01/31 16:18:31] [test_time.py:   80]: resetting model
+[26/01/31 16:20:01] [test_time.py:  130]: cifar10_c error % [pixelate1][#samples=10000]: 7.33%
+[26/01/31 16:21:31] [test_time.py:  130]: cifar10_c error % [pixelate2][#samples=10000]: 14.04%
+[26/01/31 16:23:01] [test_time.py:  130]: cifar10_c error % [pixelate3][#samples=10000]: 15.81%
+[26/01/31 16:24:30] [test_time.py:  130]: cifar10_c error % [pixelate4][#samples=10000]: 18.45%
+[26/01/31 16:26:00] [test_time.py:  130]: cifar10_c error % [pixelate5][#samples=10000]: 25.31%
+[26/01/31 16:26:00] [test_time.py:   80]: resetting model
+[26/01/31 16:27:30] [test_time.py:  130]: cifar10_c error % [jpeg_compression1][#samples=10000]: 15.57%
+[26/01/31 16:29:00] [test_time.py:  130]: cifar10_c error % [jpeg_compression2][#samples=10000]: 25.22%
+[26/01/31 16:30:30] [test_time.py:  130]: cifar10_c error % [jpeg_compression3][#samples=10000]: 28.64%
+[26/01/31 16:31:59] [test_time.py:  130]: cifar10_c error % [jpeg_compression4][#samples=10000]: 30.38%
+[26/01/31 16:33:30] [test_time.py:  130]: cifar10_c error % [jpeg_compression5][#samples=10000]: 33.87%
+[26/01/31 16:33:30] [test_time.py:  135]: mean error: 18.94%, mean error at 5: 27.13%

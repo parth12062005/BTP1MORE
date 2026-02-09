@@ -1,0 +1,49 @@
+CORRUPTION:
+  DATASET: cifar10_c
+  SEVERITY:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+  TYPE:
+    - gaussian_noise
+    - shot_noise
+    - impulse_noise
+    - defocus_blur
+    - glass_blur
+    - motion_blur
+    - zoom_blur
+    - snow
+    - frost
+    - fog
+    - brightness
+    - contrast
+    - elastic_transform
+    - pixelate
+    - jpeg_compression
+MODEL:
+  ADAPTATION: goodbatcoop
+  ARCH: ViT-B-16
+  WEIGHTS: openai
+  USE_CLIP: True
+  EPISODIC: False
+  # UNIMODAL_IMAGE_ONLY: False  # If True, disable I2T and InterMean losses
+OPTIM:
+  LR: 1e-3
+  METHOD: AdamW
+  STEPS: 1
+  BETA: 0.9
+  WD: 0.01
+TEST:
+  BATCH_SIZE: 128
+CLIP:
+  PRECISION: "fp16"
+  FREEZE_TEXT_ENCODER: False
+  PROMPT_MODE: "custom"
+  PROMPT_TEMPLATE: ["a photo of a {}."]
+TPT:
+  SELECTION_P: 0.1
+  N_CTX: 4
+  CTX_INIT: "a_photo_of_a"
+  CLASS_TOKEN_POS: "end"
