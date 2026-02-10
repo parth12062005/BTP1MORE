@@ -16,7 +16,7 @@ from typing import Union
 from copy import deepcopy
 from models import resnet26
 from models.custom_clip import ClipTestTimePromptTuning, ClipBMPET
-from models.maple_clip import ClipMaPLe
+from models.maple_clip import ClipMaPLe, build_maple_from_multimodal
 from packaging import version
 from datasets.cls_names import get_class_names
 from datasets.imagenet_subsets import IMAGENET_A_MASK, IMAGENET_R_MASK, IMAGENET_V2_MASK, IMAGENET_D109_MASK
@@ -429,29 +429,50 @@ def get_model(cfg, num_classes: int, device: Union[str, torch.device]):
                 logger.info("Successfully restored pre-trained soft prompt (CoOp)")
         elif cfg.MODEL.ADAPTATION in ["MaPLeBATCLIP", "maplebatclip", "maple_batclip"]:
             # MaPLeBATCLIP: MaPLe-style multimodal prompts + BATCLIP losses
-            prompt_depth = getattr(getattr(cfg, "MAPLE", None), "PROMPT_DEPTH", 2)
-            base_model = ClipMaPLe(
-                base_model,
-                normalization,
-                cfg.MODEL.ARCH,
-                cfg.CORRUPTION.DATASET,
-                n_ctx=cfg.TPT.N_CTX,
-                prompt_depth=prompt_depth,
-                ctx_init=cfg.TPT.CTX_INIT,
-                class_token_pos=cfg.TPT.CLASS_TOKEN_POS,
-            )
+            maple_cfg = getattr(cfg, "MAPLE", None)
+            n_ctx = getattr(maple_cfg, "N_CTX", None) or cfg.TPT.N_CTX
+            ctx_init = getattr(maple_cfg, "CTX_INIT", None) or cfg.TPT.CTX_INIT
+            prompt_depth = getattr(maple_cfg, "PROMPT_DEPTH", 2)
+            class_names = get_class_names(cfg.CORRUPTION.DATASET)
+
             if cfg.MODEL.CKPT_PATH:
+                # Use exact multimodal-prompt-learning implementation for checkpoint compatibility
+                base_model = build_maple_from_multimodal(
+                    class_names=class_names,
+                    normalization=normalization,
+                    arch_name=cfg.MODEL.ARCH,
+                    n_ctx=n_ctx,
+                    ctx_init=ctx_init,
+                    prompt_depth=prompt_depth,
+                    input_size=224,
+                )
                 ckpt = torch.load(cfg.MODEL.CKPT_PATH, map_location="cpu")
                 sd = ckpt.get("state_dict", ckpt)
-                model_sd = base_model.state_dict()
-                to_load = {k: v for k, v in sd.items() if k in model_sd and model_sd[k].shape == v.shape}
-                if to_load:
-                    base_model.load_state_dict(to_load, strict=False)
-                    logger.info(
-                        "Successfully restored MaPLeBATCLIP from %s (%d keys)",
-                        cfg.MODEL.CKPT_PATH,
-                        len(to_load),
-                    )
+                # Strip DataParallel prefix
+                sd = {k.replace("module.", ""): v for k, v in sd.items()}
+                # Remove class-dependent buffers (recomputed from class_names)
+                for key in ["prompt_learner.token_prefix", "prompt_learner.token_suffix"]:
+                    sd.pop(key, None)
+                missing, unexpected = base_model.load_state_dict(sd, strict=False)
+                if missing:
+                    logger.debug("MaPLe load missing keys: %s", missing[:5])
+                logger.info(
+                    "Successfully restored MaPLe from %s (%d keys loaded)",
+                    cfg.MODEL.CKPT_PATH,
+                    len([k for k in sd if k in base_model.state_dict()]),
+                )
+            else:
+                # TTA from scratch with open_clip-based ClipMaPLe
+                base_model = ClipMaPLe(
+                    base_model,
+                    normalization,
+                    cfg.MODEL.ARCH,
+                    cfg.CORRUPTION.DATASET,
+                    n_ctx=n_ctx,
+                    prompt_depth=prompt_depth,
+                    ctx_init=ctx_init,
+                    class_token_pos=cfg.TPT.CLASS_TOKEN_POS,
+                )
         elif cfg.MODEL.ADAPTATION in ["CoCoOpBATCLIP", "cocoopbatclip", "cocoop_batclip"]:
             # CoCoOp-BATCLIP: use CoCoOp prompt learner; optionally add image CoCoOp (reverse_meta_net)
             use_reverse_cocoop = getattr(cfg.MODEL, "USE_REVERSE_COCOOP", False) or getattr(cfg.MODEL, "IMAGE_COCOOP_CKPT_PATH", None)

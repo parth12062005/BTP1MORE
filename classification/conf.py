@@ -299,6 +299,13 @@ _C.TPT.CTX_INIT = "a_photo_of_a"    # Context initialization
 _C.TPT.CLASS_TOKEN_POS = "end"      # Position of the class token. Choose from: [end, middle, front]
 _C.TPT.LAMBDA_ENT = 0.0             # Weight for TPT-style avg-entropy loss (0.0 to disable)
 
+# ------------------------------- MAPLE options (for multimodal-prompt-learning checkpoints) -- #
+_C.MAPLE = CfgNode()
+
+_C.MAPLE.N_CTX = 2                  # Must match trained checkpoint (default: multimodal uses 2)
+_C.MAPLE.CTX_INIT = "a photo of a"  # Must match trained checkpoint (default: multimodal uses "a photo of a")
+_C.MAPLE.PROMPT_DEPTH = 9           # Must match trained checkpoint (default: multimodal uses 9)
+
 # ------------------------------- Source options -------------------------- #
 _C.SOURCE = CfgNode()
 

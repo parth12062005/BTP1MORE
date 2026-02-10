@@ -28,7 +28,9 @@ MODEL:
   WEIGHTS: openai
   USE_CLIP: True
   EPISODIC: False
-  # CKPT_PATH: ""  # Optional: path to MaPLe checkpoint (prompt_learner + deep prompts)
+  # CKPT_PATH: ""  # Path to MaPLe checkpoint from multimodal-prompt-learning (e.g. model-best.pth.tar).
+  #                # When set, uses exact multimodal implementation for full compatibility.
+  #                # N_CTX, PROMPT_DEPTH, CTX_INIT must match the trained checkpoint.
   # UNIMODAL_IMAGE_ONLY: False  # If True, disable I2T losses
 OPTIM:
   LR: 1e-3
@@ -50,5 +52,7 @@ TPT:
   CLASS_TOKEN_POS: "end"
   LAMBDA_ENT: 0.0
 MAPLE:
-  PROMPT_DEPTH: 2
+  N_CTX: 2                    # Must match trained checkpoint (multimodal default: 2)
+  CTX_INIT: "a photo of a"    # Must match trained checkpoint (multimodal default)
+  PROMPT_DEPTH: 9             # Must match trained checkpoint (multimodal default: 9)
 
