@@ -28,7 +28,7 @@ MODEL:
   WEIGHTS: openai
   USE_CLIP: True
   EPISODIC: False
-  # CKPT_PATH: ""  # Path to MaPLe checkpoint from multimodal-prompt-learning (e.g. model-best.pth.tar).
+  CKPT_PATH: "/home/ubuntu/BTP1MORE/classification/model.pth.tar-2"  # Path to MaPLe checkpoint from multimodal-prompt-learning (e.g. model-best.pth.tar).
   #                # When set, uses exact multimodal implementation for full compatibility.
   #                # N_CTX, PROMPT_DEPTH, CTX_INIT must match the trained checkpoint.
   # UNIMODAL_IMAGE_ONLY: False  # If True, disable I2T losses

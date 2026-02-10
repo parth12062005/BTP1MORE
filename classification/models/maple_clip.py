@@ -45,14 +45,19 @@ def _arch_to_backbone(arch: str) -> str:
     """Map classification ARCH (e.g. ViT-B-16) to multimodal backbone name (ViT-B/16)."""
     if "/" in arch:
         return arch
-    return arch.replace("-", "/", 1)  # ViT-B-16 -> ViT-B/16
+    # ViT-B-16 -> ViT-B/16 (replace last hyphen with slash for patch size)
+    parts = arch.split("-")
+    if len(parts) >= 3:
+        return "-".join(parts[:-1]) + "/" + parts[-1]
+    return arch
 
 
 def _load_multimodal_clip(backbone_name: str, n_ctx: int):
     """Load CLIP with MaPLe architecture from multimodal-prompt-learning (OpenAI weights)."""
-    import clip
-    url = clip._MODELS[backbone_name]
-    model_path = clip._download(url)
+    # Import from clip.clip submodule - _MODELS and _download live there (not in package __all__)
+    from clip import clip as clip_mod
+    url = clip_mod._MODELS[backbone_name]
+    model_path = clip_mod._download(url)
     try:
         model = torch.jit.load(model_path, map_location="cpu").eval()
         state_dict = None
@@ -66,7 +71,7 @@ def _load_multimodal_clip(backbone_name: str, n_ctx: int):
         "language_ctx": 0,
         "maple_length": n_ctx,
     }
-    return clip.build_model(state_dict or model.state_dict(), design_details)
+    return build_maple_model(state_dict or model.state_dict(), design_details)
 
 
 class _MultimodalTextEncoder(nn.Module):

@@ -295,6 +295,7 @@ _C.TPT = CfgNode()
 
 _C.TPT.SELECTION_P = 0.1            # Percentile of the most certain prediction
 _C.TPT.N_CTX = 4                    # Number of tunable context tokens
+_C.TPT.N_CTX_VIS = 4                # Number of visual context tokens (BMPET; defaults to N_CTX if not set)
 _C.TPT.CTX_INIT = "a_photo_of_a"    # Context initialization
 _C.TPT.CLASS_TOKEN_POS = "end"      # Position of the class token. Choose from: [end, middle, front]
 _C.TPT.LAMBDA_ENT = 0.0             # Weight for TPT-style avg-entropy loss (0.0 to disable)
