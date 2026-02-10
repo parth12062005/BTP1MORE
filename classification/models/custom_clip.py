@@ -749,9 +749,10 @@ class ClipBMPET(nn.Module):
         self.image_encoder = VisualEncoderWithContext(clip_model.visual, self.visual_ctx_learner)
         
         # Fusion: concat(image_features, text_mean) -> both are embed_dim after projection -> 2 * embed_dim
+        # Keep fusion and head in float32 to avoid mat1/mat2 dtype mismatch (CLIP base may be fp16)
         fusion_input_dim = embed_dim * 2
-        self.fusion = FusionMLP(input_dim=fusion_input_dim, hidden_dim=512, output_dim=128)
-        self.head_text_bias = BiasHead(input_dim=128, hidden_dim=64, output_dim=embed_dim)
+        self.fusion = FusionMLP(input_dim=fusion_input_dim, hidden_dim=512, output_dim=128).float()
+        self.head_text_bias = BiasHead(input_dim=128, hidden_dim=64, output_dim=embed_dim).float()
 
     @property
     def dtype(self):
@@ -795,11 +796,12 @@ class ClipBMPET(nn.Module):
         image_features = img_pre_features / (img_pre_features.norm(dim=-1, keepdim=True) + 1e-8)
         
         # ----- Fusion + text bias head: embeddings -> prompt-space bias (CoCoOp-style) -----
-        # Fusion/heads are float32; CLIP may be Half -> cast for linear layers then back
-        joint = torch.cat([image_features, text_mean], dim=-1)  # (B, 2 * dim), may be Half
-        joint_f = joint.float()
+        # Fusion/heads may be float32; CLIP may be Half -> cast input to fusion dtype to avoid mat1/mat2 mismatch
+        joint = torch.cat([image_features, text_mean], dim=-1)  # (B, 2 * dim)
+        fusion_dtype = next(self.fusion.parameters()).dtype
+        joint_f = joint.to(fusion_dtype)
         z = self.fusion(joint_f)  # (B, 128)
-        bias_text = self.head_text_bias(z)   # (B, dim) - interpret as bias in prompt/ctx space
+        bias_text = self.head_text_bias(z)  # z same dtype as fusion output
         bias_text = bias_text.to(image_features.dtype)
         
         # ----- Second pass (final): apply BMPET bias in prompt space and re-encode text -----
