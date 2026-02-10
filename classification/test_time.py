@@ -145,4 +145,4 @@ def evaluate(description):
 
 
 if __name__ == '__main__':
-    evaluate('"Evaluation.')
+    evaluate('Evaluation.')
